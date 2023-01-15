@@ -7,8 +7,7 @@ data class User(
     val avatar: String,
     val bannerImage: String = "https://ik.imagekit.io/6xgh00mrhaz/SocialMedia/posters/image_${
         Random.nextInt(
-            1,
-            8
+            1, 8
         )
     }.jpg",
     val fallowers: Int = Random.nextInt(100, 9999),
@@ -79,28 +78,37 @@ data class User(
 data class Friends(
     val name: String,
     val avatar: String,
+    val bannerImage: String,
 ) {
     companion object {
         val mock = listOf(
             Friends(
                 name = "Carlos Ernesto",
-                avatar = "https://ik.imagekit.io/6xgh00mrhaz/SocialMedia/avatars/avatar_5.jpg"
+                avatar = "https://ik.imagekit.io/6xgh00mrhaz/SocialMedia/avatars/avatar_5.jpg",
+                bannerImage = "https://ik.imagekit.io/6xgh00mrhaz/SocialMedia/posters/image_1.jpg"
             ),
             Friends(
                 name = "Ivan Rodriguez",
-                avatar = "https://ik.imagekit.io/6xgh00mrhaz/SocialMedia/avatars/avatar_4.jpg"
+                avatar = "https://ik.imagekit.io/6xgh00mrhaz/SocialMedia/avatars/avatar_4.jpg",
+                bannerImage = "https://ik.imagekit.io/6xgh00mrhaz/SocialMedia/posters/image_2.jpg"
+
             ),
             Friends(
                 name = "Esther Kintana",
-                avatar = "https://ik.imagekit.io/6xgh00mrhaz/SocialMedia/avatars/avatar_8.jpg"
+                avatar = "https://ik.imagekit.io/6xgh00mrhaz/SocialMedia/avatars/avatar_8.jpg",
+                bannerImage = "https://ik.imagekit.io/6xgh00mrhaz/SocialMedia/posters/image_3.jpg"
+
             ),
             Friends(
                 name = "Carmen Perez",
-                avatar = "https://ik.imagekit.io/6xgh00mrhaz/SocialMedia/avatars/avatar_1.jpg"
+                avatar = "https://ik.imagekit.io/6xgh00mrhaz/SocialMedia/avatars/avatar_1.jpg",
+                bannerImage = "https://ik.imagekit.io/6xgh00mrhaz/SocialMedia/posters/image_4.jpg"
             ),
             Friends(
                 name = "Luis Fidel Casanova",
-                avatar = "https://ik.imagekit.io/6xgh00mrhaz/SocialMedia/avatars/avatar_3.jpg"
+                avatar = "https://ik.imagekit.io/6xgh00mrhaz/SocialMedia/avatars/avatar_3.jpg",
+                bannerImage = "https://ik.imagekit.io/6xgh00mrhaz/SocialMedia/posters/image_5.jpg"
+
             ),
         )
 
@@ -180,6 +188,9 @@ data class UserList(
 data class Poster(
     val posterText: String,
     val posterImage: List<String>,
+    val likes: Int = Random.nextInt(100, 9999),
+    val comments: Int = Random.nextInt(100, 9999),
+    val shared: Int = Random.nextInt(100, 9999),
     val user: User,
     val time: String
 )
@@ -194,22 +205,21 @@ data class PostersList(
             "Lorem ipsum dolor sit amet",
             "Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam",
             """
-                Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt
-                ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco
-                laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit 
-                in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat 
-                non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.
+                Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.
             """.trimIndent()
         )
 
-        private val lisOfPosterImages = (1..Random.nextInt(1, 8)).map {
-            "https://ik.imagekit.io/6xgh00mrhaz/SocialMedia/posters/image_$it.jpg"
-        }.shuffled()
 
         val mock = (1..10).map {
             Poster(
                 posterText = listOfPostersText.random(),
-                posterImage = lisOfPosterImages,
+                posterImage = (1..Random.nextInt(1, 8)).map {
+                    "https://ik.imagekit.io/6xgh00mrhaz/SocialMedia/posters/image_${
+                        Random.nextInt(
+                            1, 8
+                        )
+                    }.jpg"
+                }.shuffled(),
                 user = UserList.mock.random(),
                 time = "${Random.nextInt(10, 60)} m"
             )

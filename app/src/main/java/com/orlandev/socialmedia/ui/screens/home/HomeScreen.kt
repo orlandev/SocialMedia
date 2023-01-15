@@ -1,4 +1,4 @@
-package com.orlandev.socialmedia.ui.screens
+package com.orlandev.socialmedia.ui.screens.home
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
@@ -12,6 +12,9 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.ExperimentalMaterialApi
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.*
+import androidx.compose.material.icons.outlined.Comment
+import androidx.compose.material.icons.outlined.FavoriteBorder
+import androidx.compose.material.icons.outlined.Share
 import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
@@ -30,15 +33,20 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
 import coil.compose.SubcomposeAsyncImage
+import com.google.accompanist.placeholder.PlaceholderHighlight
+import com.google.accompanist.placeholder.placeholder
+import com.google.accompanist.placeholder.shimmer
 import com.orlandev.socialmedia.R
+import com.orlandev.socialmedia.data.models.Poster
 import com.orlandev.socialmedia.data.models.User
-import com.orlandev.socialmedia.ui.theme.facebookBlue
-import com.orlandev.socialmedia.ui.theme.facebookFucsiaColor
-import com.orlandev.socialmedia.ui.theme.facebookGray
-import com.orlandev.socialmedia.ui.theme.facebookGreenColor
+import com.orlandev.socialmedia.ui.theme.*
 import compose.icons.FontAwesomeIcons
 import compose.icons.fontawesomeicons.Brands
 import compose.icons.fontawesomeicons.brands.Facebook
+
+val avatarModifier = Modifier
+    .size(40.dp)
+    .clip(CircleShape)
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -46,6 +54,8 @@ fun HomeScreen(homeViewModel: HomeViewModel = hiltViewModel()) {
 
     val currentUser = homeViewModel.currentUser.value
     val users = homeViewModel.users.value
+    val posters = homeViewModel.posters.value
+
 
     //Banner
     Scaffold(
@@ -77,13 +87,10 @@ fun HomeScreen(homeViewModel: HomeViewModel = hiltViewModel()) {
 
                     Spacer(modifier = Modifier.size(14.dp))
 
-                    SubcomposeAsyncImage(
-                        modifier = Modifier
-                            .size(40.dp)
-                            .clip(CircleShape),
-                        model = currentUser.avatar, contentDescription = null,
-                        contentScale = ContentScale.Crop
+                    LoadImage(
+                        url = currentUser.avatar, modifier = avatarModifier
                     )
+
 
                 }
             )
@@ -120,7 +127,7 @@ fun HomeScreen(homeViewModel: HomeViewModel = hiltViewModel()) {
                             fontWeight = FontWeight.Bold,
                             letterSpacing = 2.sp,
                             style = MaterialTheme.typography.bodyMedium,
-                            color = Color.Gray.copy(alpha = 0.6f),
+                            color = facebookTextGrayColor,
                             text = stringResource(id = R.string.home_message_text)
                         )
 
@@ -171,8 +178,291 @@ fun HomeScreen(homeViewModel: HomeViewModel = hiltViewModel()) {
                 StoryBoard(currentUser = currentUser, usersList = users)
             }
 
+            items(posters) { item: Poster ->
+
+                CardPoster(item)
+
+            }
+
+            //Bottom Space
+
+            item {
+                Spacer(modifier = Modifier.size(40.dp))
+            }
+
         }
     }
+}
+
+@Composable
+fun CardPoster(item: Poster) {
+
+    Column(
+        modifier = Modifier
+            .fillMaxWidth()
+            .wrapContentHeight(), verticalArrangement = Arrangement.spacedBy(10.dp)
+    ) {
+
+        Divider(
+            modifier = Modifier
+                .fillMaxWidth()
+                .height(8.dp), color = facebookGray
+        )
+        Column(
+            modifier = Modifier
+                .fillMaxWidth()
+                .wrapContentHeight(),
+            verticalArrangement = Arrangement.spacedBy(20.dp)
+        ) {
+            //HeaderPOst
+            Row(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(horizontal = 12.dp),
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.SpaceBetween
+            ) {
+
+                Row(modifier = Modifier) {
+                    LoadImage(modifier = avatarModifier, url = item.user.avatar)
+                    Spacer(modifier = Modifier.size(20.dp))
+                    Column(modifier = Modifier) {
+                        Text(text = item.user.name, style = MaterialTheme.typography.titleMedium)
+                        Row(modifier = Modifier) {
+                            Text(
+                                text = item.time,
+                                color = facebookTextGrayColor,
+
+                                style = MaterialTheme.typography.bodySmall
+                            )
+                            Spacer(modifier = Modifier.size(10.dp))
+                            Icon(
+                                modifier = Modifier.size(16.dp),
+                                imageVector = Icons.Default.People,
+                                contentDescription = null,
+                                tint = facebookTextGrayColor
+                            )
+                        }
+                    }
+                }
+
+                IconButton(onClick = { /*TODO*/ }) {
+                    Icon(imageVector = Icons.Default.MoreVert, contentDescription = null)
+                }
+
+            }
+
+            Text(
+                modifier = Modifier.padding(horizontal = 12.dp),
+                text = item.posterText,
+                style = MaterialTheme.typography.bodyMedium
+            )
+
+
+            when (item.posterImage.size) {
+                1 -> {
+                    PosterImage(item.posterImage.first())
+                }
+
+                2 -> {
+                    Poster2Images(item.posterImage)
+                }
+
+                3 -> {
+                    Poster3Images(item.posterImage)
+                }
+
+                else -> PosterMoreImages(item.posterImage)
+            }
+        }
+
+        Row(
+            modifier = Modifier.fillMaxWidth(),
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.SpaceAround
+        ) {
+
+            Row(
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.spacedBy(8.dp)
+            ) {
+                Icon(imageVector = Icons.Outlined.FavoriteBorder, contentDescription = null, tint = facebookRedColor)
+
+                Text(text = "${item.likes}", style = MaterialTheme.typography.bodySmall)
+            }
+            Row(
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.spacedBy(8.dp)
+            ) {
+                Icon(imageVector = Icons.Outlined.Comment, contentDescription = null)
+
+                Text(text = "${item.comments}", style = MaterialTheme.typography.bodySmall)
+            }
+            Row(
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.spacedBy(8.dp)
+            ) {
+                Icon(imageVector = Icons.Outlined.Share, contentDescription = null)
+
+                Text(text = "${item.shared}", style = MaterialTheme.typography.bodySmall)
+            }
+
+        }
+    }
+}
+
+@Composable
+fun PosterMoreImages(posterImage: List<String>) {
+    val image1 = posterImage.first()
+    val image2 = posterImage[1]
+    val image3 = posterImage[2]
+
+    Row(
+        modifier = Modifier
+            .fillMaxWidth()
+            .height(200.dp)
+    ) {
+        LoadImage(
+            modifier = Modifier
+                .fillMaxWidth()
+                .weight(1f), url = image1
+        )
+        Spacer(modifier = Modifier.size(2.dp))
+        Column(
+            modifier = Modifier
+                .fillMaxWidth()
+                .weight(1f)
+        ) {
+            LoadImage(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .weight(1f), url = image2
+            )
+            Spacer(modifier = Modifier.size(2.dp))
+            Box(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .weight(1f), contentAlignment = Alignment.Center
+            ) {
+                LoadImage(
+                    modifier = Modifier.fillMaxSize(), url = image3
+                )
+
+                Box(
+                    modifier = Modifier
+                        .fillMaxSize()
+                        .background(Color.Black.copy(alpha = 0.6f))
+                )
+
+                Text(
+                    text = "${posterImage.size - 3} +",
+                    color = Color.White,
+                    style = MaterialTheme.typography.titleLarge
+                )
+
+            }
+        }
+    }
+}
+
+@Composable
+fun Poster3Images(posterImage: List<String>) {
+
+    val image1 = posterImage.first()
+    val image2 = posterImage[1]
+    val image3 = posterImage[2]
+
+    Row(
+        modifier = Modifier
+            .fillMaxWidth()
+            .height(200.dp)
+    ) {
+        LoadImage(
+            modifier = Modifier
+                .fillMaxWidth()
+                .weight(1f), url = image1
+        )
+        Spacer(modifier = Modifier.size(2.dp))
+        Column(
+            modifier = Modifier
+                .fillMaxWidth()
+                .weight(1f)
+        ) {
+            LoadImage(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .weight(1f), url = image2
+            )
+            Spacer(modifier = Modifier.size(2.dp))
+            LoadImage(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .weight(1f), url = image3
+            )
+        }
+    }
+
+}
+
+@Composable
+fun Poster2Images(posterImage: List<String>) {
+
+    val image1 = posterImage.first()
+    val image2 = posterImage[1]
+
+    Row(
+        modifier = Modifier
+            .fillMaxWidth()
+            .height(200.dp)
+    ) {
+
+        LoadImage(
+            modifier = Modifier
+                .fillMaxWidth()
+                .weight(1f),
+            url = image1
+        )
+
+        Spacer(modifier = Modifier.size(2.dp))
+
+        LoadImage(
+            modifier = Modifier
+                .fillMaxWidth()
+                .weight(1f),
+            url = image2
+        )
+
+    }
+}
+
+@Composable
+fun PosterImage(url: String) {
+    LoadImage(
+        modifier = Modifier
+            .fillMaxWidth()
+            .height(200.dp), url = url
+    )
+}
+
+@Composable
+fun LoadImage(modifier: Modifier, url: String) {
+    SubcomposeAsyncImage(
+        modifier = modifier,
+        model = url,
+        contentDescription = null,
+        contentScale = ContentScale.Crop,
+        loading = {
+            Box(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .placeholder(
+                        visible = true,
+                        color = Color.White,
+                        highlight = PlaceholderHighlight.shimmer(highlightColor = facebookGray)
+                    )
+            )
+        }
+    )
 }
 
 @Composable
@@ -252,12 +542,11 @@ fun StoryCard(
         Box(
             modifier = Modifier.fillMaxSize()
         ) {
-            SubcomposeAsyncImage(
+            LoadImage(
                 modifier = Modifier
                     .fillMaxWidth()
                     .height(110.dp),
-                model = bannerImage, contentScale = ContentScale.Crop,
-                contentDescription = null
+                url = bannerImage
             )
 
             Column(
@@ -287,13 +576,11 @@ fun StoryCard(
                         )
                     }
                 } else {
-                    SubcomposeAsyncImage(
-                        modifier = Modifier
-                            .size(40.dp)
-                            .clip(CircleShape)
-                            .border(2.dp, color = Color.White, shape = CircleShape),
-                        model = avatarImage, contentScale = ContentScale.Crop,
-                        contentDescription = null
+                    LoadImage(
+                        modifier = avatarModifier.then(
+                            Modifier.border(2.dp, color = Color.White, shape = CircleShape)
+                        ),
+                        url = avatarImage
                     )
                 }
 
@@ -317,7 +604,7 @@ fun StoryCard(
 fun CommonButton(
     color: Color = Color.Red,
     tintColor: Color = Color.White,
-    icon: ImageVector,
+    icon: ImageVector?=null,
     text: String? = null,
     width: Dp = 120.dp,
     onClick: () -> Unit
@@ -344,12 +631,14 @@ fun CommonButton(
                 verticalAlignment = Alignment.CenterVertically,
                 horizontalArrangement = Arrangement.Center
             ) {
-                Icon(
-                    modifier = Modifier.size(15.dp),
-                    imageVector = icon,
-                    contentDescription = null,
-                    tint = tintColor
-                )
+                icon?.let {
+                    Icon(
+                        modifier = Modifier.size(15.dp),
+                        imageVector = icon,
+                        contentDescription = null,
+                        tint = tintColor
+                    )
+                }
                 text?.let {
                     Spacer(modifier = Modifier.size(4.dp))
                     Text(text = text, color = tintColor)

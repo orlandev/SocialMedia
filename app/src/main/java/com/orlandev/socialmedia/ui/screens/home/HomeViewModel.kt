@@ -1,4 +1,4 @@
-package com.orlandev.socialmedia.ui.screens
+package com.orlandev.socialmedia.ui.screens.home
 
 import androidx.compose.runtime.mutableStateOf
 import androidx.lifecycle.ViewModel
